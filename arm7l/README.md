@@ -179,6 +179,8 @@ The following packages have native binaries that may not support arm7l:
 2. **@parcel/watcher** - File watching
 3. **bun-pty** - Pseudoterminal support
 
+> Note: `tree-sitter-bash` (shell parsing) is removed from the ARM7L package.json and is disabled via overrides because it requires native build tooling (Android NDK) that is not expected on unrooted Termux devices. Some parsing-related features may be unavailable.
+
 You'll need to:
 
 - Find arm7l-compatible alternatives
