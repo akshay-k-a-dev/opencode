@@ -177,10 +177,12 @@ echo "Step 2: Installing Node.js dependencies..."
 echo "(This may take a while on ARM7L)"
 echo ""
 
-# Install dependencies with npm (skip optional deps, allow legacy peer deps)
-npm install --no-optional --legacy-peer-deps || {
-    echo "❌ npm install failed!"
-    echo "Try: npm install --verbose"
+# Install dependencies with npm explicitly for the packages/opencode folder
+# Use --prefix to avoid npm treating the repo root or another workspace as the install root.
+# Skip optional deps and accept legacy peer deps to work around peer conflicts on ARM7L
+npm install --prefix "$OPENCODE_ROOT/packages/opencode" --no-optional --legacy-peer-deps || {
+    echo "❌ npm install failed in $OPENCODE_ROOT/packages/opencode!"
+    echo "Try: npm install --prefix \"$OPENCODE_ROOT/packages/opencode\" --verbose --no-optional --legacy-peer-deps"
     exit 1
 }
 
