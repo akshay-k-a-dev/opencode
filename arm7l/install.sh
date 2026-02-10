@@ -149,13 +149,36 @@ fi
 # Use ARM7L package.json
 mv package-arm7l.json package.json
 
+# Sanitize package.json: remove "catalog:" placeholders which npm can't interpret
+echo "Sanitizing package.json (removing 'catalog:' placeholders)..."
+node -e '
+const fs = require("fs");
+const p = "package.json";
+const j = JSON.parse(fs.readFileSync(p, "utf8"));
+const sections = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"];
+let removed = [];
+sections.forEach(s => {
+  if (j[s]) {
+    Object.keys(j[s]).forEach(k => {
+      if (j[s][k] === "catalog:") {
+        delete j[s][k];
+        removed.push(`${k}@${s}`);
+      }
+    });
+  }
+});
+fs.writeFileSync(p, JSON.stringify(j, null, 2));
+if (removed.length) console.log("Removed catalog placeholders:", removed.join(", "));
+else console.log("No 'catalog:' placeholders found in package.json.");
+'
+
 echo ""
 echo "Step 2: Installing Node.js dependencies..."
 echo "(This may take a while on ARM7L)"
 echo ""
 
-# Install dependencies with npm
-npm install || {
+# Install dependencies with npm (skip optional deps, allow legacy peer deps)
+npm install --no-optional --legacy-peer-deps || {
     echo "❌ npm install failed!"
     echo "Try: npm install --verbose"
     exit 1
