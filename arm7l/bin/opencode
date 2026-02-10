@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+
+/**
+ * OpenCode CLI entry point for ARM7L
+ * 
+ * This script loads Bun shims before importing the main OpenCode code,
+ * allowing it to run on ARM7L systems using Node.js instead of Bun.
+ */
+
+// Load Bun shims first
+import '../shims/bun-shim.js';
+
+// Now import and run the main OpenCode CLI
+import '../src/index.ts';
