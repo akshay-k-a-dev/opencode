@@ -11,7 +11,34 @@ echo "========================================"
 echo ""
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-OPENCODE_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+# Find repository root by walking up until we find packages/opencode or .git
+find_repo_root() {
+  dir="$SCRIPT_DIR"
+  while [ "$dir" != "/" ] && [ "$dir" != "." ]; do
+    if [ -d "$dir/packages/opencode" ] || [ -d "$dir/.git" ]; then
+      echo "$dir"
+      return 0
+    fi
+    next="$(dirname "$dir")"
+    if [ "$next" = "$dir" ]; then break; fi
+    dir="$next"
+  done
+  return 1
+}
+
+if OPENCODE_ROOT="$(find_repo_root)"; then
+  :
+else
+  if [ -d "$HOME/opencode" ]; then
+    OPENCODE_ROOT="$HOME/opencode"
+    echo "Falling back to \$HOME/opencode: $OPENCODE_ROOT"
+  else
+    echo "❌ Could not locate repository root (searched for packages/opencode or .git)." >&2
+    exit 1
+  fi
+fi
+
 SRC_DIR="$OPENCODE_ROOT/packages/opencode/src"
 
 echo "Source directory: $SRC_DIR"

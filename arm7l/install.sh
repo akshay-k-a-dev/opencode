@@ -96,7 +96,36 @@ echo ""
 
 # Get the OpenCode root directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-OPENCODE_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+# Find repository root by walking up until we find packages/opencode or .git
+find_repo_root() {
+  dir="$SCRIPT_DIR"
+  while [ "$dir" != "/" ] && [ "$dir" != "." ]; do
+    if [ -d "$dir/packages/opencode" ] || [ -d "$dir/.git" ]; then
+      echo "$dir"
+      return 0
+    fi
+    next="$(dirname "$dir")"
+    if [ "$next" = "$dir" ]; then break; fi
+    dir="$next"
+  done
+  return 1
+}
+
+if OPENCODE_ROOT="$(find_repo_root)"; then
+  echo "Detected repository root: $OPENCODE_ROOT"
+else
+  # Fallback to $HOME/opencode if present (Termux common path)
+  if [ -d "$HOME/opencode" ]; then
+    OPENCODE_ROOT="$HOME/opencode"
+    echo "Falling back to \$HOME/opencode: $OPENCODE_ROOT"
+  else
+    echo "❌ Could not locate repository root (searched for packages/opencode or .git)."
+    echo "Please run this script from within the repository or set OPENCODE_ROOT to the repo root."
+    exit 1
+  fi
+fi
+
 ARM7L_DIR="$SCRIPT_DIR"
 
 echo "OpenCode root: $OPENCODE_ROOT"
